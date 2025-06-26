@@ -19,7 +19,7 @@ x-superset-image: &superset-image apachesuperset.docker.scarf.sh/apache/superset
 x-superset-depends-on: &superset-depends-on
   - db
   - redis
-  # - superset-init
+  - facility-reporting-db
 x-superset-volumes:
   &superset-volumes # /app/pythonpath_docker will be appended to the PYTHONPATH in the final container
   - ./docker:/app/docker
@@ -40,7 +40,15 @@ services:
     restart: unless-stopped
     volumes:
       - fw_db_home:/var/lib/postgresql/data
-      - ./docker/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d      
+      - ./docker/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+  facility-reporting-db:
+    image: mysql:8.0
+    container_name: facilitywide_db
+    env_file: .env
+    ports:
+      - "3306:3306"
+    volumes:
+      - fw_reporting_db:/var/lib/mysql             
   superset:
     env_file: .env
     image: *superset-image
@@ -96,6 +104,8 @@ volumes:
   fw_superset_home:
     external: false
   fw_db_home:
+    external: false
+  fw_reporting_db:
     external: false    
   fw_redis:
     external: false

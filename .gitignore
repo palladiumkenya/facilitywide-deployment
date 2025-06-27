@@ -92,5 +92,6 @@ release.json
 messages.mo
 
 docker/requirements-local.txt
+docker/docker-entrypoint-initdb.d/fw_superset.sql
 
 cache/

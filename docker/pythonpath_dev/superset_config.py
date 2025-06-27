@@ -144,7 +144,6 @@ WTF_CSRF_ENABLED = False
 ALERT_REPORTS_NOTIFICATION_DRY_RUN = True
 
 SQLLAB_CTAS_NO_LIMIT = True
-
 #
 # Optionally import superset_config_docker.py (which will have been included on
 # the PYTHONPATH) in order to allow for local settings to be overridden

@@ -14,98 +14,98 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
 x-superset-image: &superset-image apachesuperset.docker.scarf.sh/apache/superset:3.1.0
 x-superset-depends-on: &superset-depends-on
-  - db
-  - redis
-  - facility-reporting-db
+ - db
+ - redis
+ - facility-reporting-db
 x-superset-volumes:
-  &superset-volumes # /app/pythonpath_docker will be appended to the PYTHONPATH in the final container
-  - ./docker:/app/docker
-  - fw_superset_home:/app/superset_home
+ &superset-volumes # /app/pythonpath_docker will be appended to the PYTHONPATH in the final container
+ - ./docker:/app/docker
+ - fw_superset_home:/app/superset_home
 
 version: "3.7"
 services:
-  redis:
-    image: redis:7
-    container_name: superset_cache
-    restart: unless-stopped
-    volumes:
-      - fw_redis:/data
-  db:
-    env_file: .env
-    image: postgres:15
-    container_name: superset_db
-    restart: unless-stopped
-    volumes:
-      - fw_db_home:/var/lib/postgresql/data
-      - ./docker/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
-  facility-reporting-db:
-    image: mysql:8.0
-    container_name: facilitywide_db
-    env_file: .env
-    ports:
-      - "3306:3306"
-    volumes:
-      - fw_reporting_db:/var/lib/mysql             
-  superset:
-    env_file: .env
-    image: *superset-image
-    container_name: superset_app
-    command: ["/app/docker/docker-bootstrap.sh", "app-gunicorn"]
-    user: "root"
-    restart: unless-stopped
-    ports:
-      - 8088:8088
-    depends_on: *superset-depends-on
-    volumes: *superset-volumes
+ redis:
+   image: redis:7
+   container_name: superset_cache
+   restart: unless-stopped
+   volumes:
+     - fw_redis:/data
+ db:
+   env_file: .env
+   image: postgres:15
+   container_name: superset_db
+   ports:
+     - "5432:5432"   
+   restart: unless-stopped
+   volumes:
+     - fw_db_home:/var/lib/postgresql/data
+     - ./docker/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+ facility-reporting-db:
+   image: mysql:8.0
+   container_name: facilitywide_db
+   env_file: .env
+   ports:
+     - "3306:3306"
+   volumes:
+     - fw_reporting_db:/var/lib/mysql            
+ visualization-receiver:
+   container_name: visualization_receiver
+   env_file: .env
+   build:
+     context: ./kenyaemr_visualization_receiver
+     dockerfile: Dockerfile
+   ports:
+     - "5000:5000"
+  
+ superset:
+   env_file: .env
+   image: *superset-image
+   container_name: superset_app
+   command: ["/app/docker/docker-bootstrap.sh", "app-gunicorn"]
+   user: "root"
+   restart: unless-stopped
+   ports:
+     - 8088:8088
+   depends_on: *superset-depends-on
+   volumes: *superset-volumes
 
-  superset-init:
-    image: *superset-image
-    container_name: superset_init
-    command: ["/app/docker/docker-init.sh"]
-    env_file: .env
-    depends_on: *superset-depends-on
-    user: "root"
-    volumes: *superset-volumes
-    healthcheck:
-      disable: true
 
-  superset-worker:
-    image: *superset-image
-    container_name: superset_worker
-    command: ["/app/docker/docker-bootstrap.sh", "worker"]
-    env_file: .env
-    restart: unless-stopped
-    depends_on: *superset-depends-on
-    user: "root"
-    volumes: *superset-volumes
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "celery -A superset.tasks.celery_app:app inspect ping -d celery@$$HOSTNAME",
-        ]
+ superset-worker:
+   image: *superset-image
+   container_name: superset_worker
+   command: ["/app/docker/docker-bootstrap.sh", "worker"]
+   env_file: .env
+   restart: unless-stopped
+   depends_on: *superset-depends-on
+   user: "root"
+   volumes: *superset-volumes
+   healthcheck:
+     test:
+       [
+         "CMD-SHELL",
+         "celery -A superset.tasks.celery_app:app inspect ping -d celery@$$HOSTNAME",
+       ]
 
-  superset-worker-beat:
-    image: *superset-image
-    container_name: superset_worker_beat
-    command: ["/app/docker/docker-bootstrap.sh", "beat"]
-    env_file: .env
-    restart: unless-stopped
-    depends_on: *superset-depends-on
-    user: "root"
-    volumes: *superset-volumes
-    healthcheck:
-      disable: true
+ superset-worker-beat:
+   image: *superset-image
+   container_name: superset_worker_beat
+   command: ["/app/docker/docker-bootstrap.sh", "beat"]
+   env_file: .env
+   restart: unless-stopped
+   depends_on: *superset-depends-on
+   user: "root"
+   volumes: *superset-volumes
+   healthcheck:
+     disable: true
 
 volumes:
-  fw_superset_home:
-    external: false
-  fw_db_home:
-    external: false
-  fw_reporting_db:
-    external: false    
-  fw_redis:
-    external: false
+ fw_superset_home:
+   external: false
+ fw_db_home:
+   external: false
+ fw_reporting_db:
+   external: false   
+ fw_redis:
+   external: false

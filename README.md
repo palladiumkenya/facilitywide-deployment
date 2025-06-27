@@ -20,4 +20,4 @@ To run the application, please follow these steps:
       - **Username:** `admin`
       - **Password:** `admin`
 
-> **Note:** If you need to change the default credentials, update the relevant environment variables in your Docker Compose configuration using the `.env` file. Refer to the `.env.example` file for reference. 
+> **Note:** If you need to change the default credentials, update the relevant environment variables in your Docker Compose configuration using the `.env` file. Refer to the `env.example` file for reference. 

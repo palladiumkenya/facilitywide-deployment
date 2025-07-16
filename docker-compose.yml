@@ -47,7 +47,7 @@ services:
    container_name: facilitywide_db
    env_file: .env
    ports:
-     - "3306:3306"
+     - "3333:3306"
    volumes:
      - fw_reporting_db:/var/lib/mysql            
  visualization-receiver:

@@ -41,7 +41,7 @@ services:
    restart: unless-stopped
    volumes:
      - fw_db_home:/var/lib/postgresql/data
-     - ./docker/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+     - ./docker/docker-entrypoint-initdb.d/postgres:/docker-entrypoint-initdb.d
  facility-reporting-db:
    image: mysql:8.0
    container_name: facilitywide_db
@@ -49,7 +49,8 @@ services:
    ports:
      - "3333:3306"
    volumes:
-     - fw_reporting_db:/var/lib/mysql            
+     - fw_reporting_db:/var/lib/mysql 
+     - ./docker/docker-entrypoint-initdb.d/mysql:/docker-entrypoint-initdb.d   
  visualization-receiver:
    container_name: visualization_receiver
    env_file: .env

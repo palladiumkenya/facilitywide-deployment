@@ -1,0 +1,1 @@
+CREATE ROLE superset WITH LOGIN SUPERUSER PASSWORD 'superset';
